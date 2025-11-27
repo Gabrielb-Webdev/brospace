@@ -1,0 +1,32 @@
+# Enable rewrite engine
+RewriteEngine On
+
+# Force MIME types for JavaScript modules
+<IfModule mod_mime.c>
+    AddType application/javascript .js
+    AddType application/javascript .mjs
+    AddType text/javascript .js
+    AddType text/css .css
+    AddType image/svg+xml .svg
+</IfModule>
+
+# Set correct headers
+<IfModule mod_headers.c>
+    <FilesMatch "\.(js|mjs)$">
+        Header set Content-Type "application/javascript"
+    </FilesMatch>
+    <FilesMatch "\.css$">
+        Header set Content-Type "text/css"
+    </FilesMatch>
+</IfModule>
+
+# API routes - don't redirect
+RewriteCond %{REQUEST_URI} ^/api/ [NC]
+RewriteRule ^ - [L]
+
+# Don't rewrite existing files or directories
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Redirect all other requests to index.html (SPA)
+RewriteRule ^ /index.html [L]
