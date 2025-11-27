@@ -7,7 +7,11 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+
+# Build
+dist
 dist-ssr
 *.local
 
@@ -31,3 +35,15 @@ dist-ssr
 .firebase
 .firebaserc
 firebase-debug.log
+
+# Development files - DO NOT UPLOAD TO HOSTINGER
+src/
+public/
+*.md
+!README.md
+*.config.js
+*.config.ts
+tsconfig*.json
+package*.json
+.editorconfig
+HOSTINGER.htaccess
