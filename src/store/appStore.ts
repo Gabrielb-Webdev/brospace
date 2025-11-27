@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { Project, Task, TimeEntry, Comment } from '../types'
+import { API_ENDPOINTS, apiRequest } from '../lib/api'
 
 interface AppState {
   projects: Project[]
@@ -7,11 +8,13 @@ interface AppState {
   timeEntries: TimeEntry[]
   comments: Comment[]
   activeTimer: TimeEntry | null
+  isLoading: boolean
   
+  fetchProjects: () => Promise<void>
   setProjects: (projects: Project[]) => void
-  addProject: (project: Project) => void
-  updateProject: (id: string, updates: Partial<Project>) => void
-  deleteProject: (id: string) => void
+  addProject: (project: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'shareToken'>) => Promise<void>
+  updateProject: (id: string, updates: Partial<Project>) => Promise<void>
+  deleteProject: (id: string) => Promise<void>
   
   setTasks: (tasks: Task[]) => void
   addTask: (task: Task) => void
@@ -32,23 +35,75 @@ export const useAppStore = create<AppState>((set, get) => ({
   timeEntries: [],
   comments: [],
   activeTimer: null,
+  isLoading: false,
+  
+  fetchProjects: async () => {
+    set({ isLoading: true })
+    try {
+      const projects = await apiRequest(API_ENDPOINTS.PROJECTS)
+      set({ projects: projects || [], isLoading: false })
+    } catch (error) {
+      console.error('Failed to fetch projects:', error)
+      set({ isLoading: false })
+    }
+  },
   
   setProjects: (projects) => set({ projects }),
   
-  addProject: (project) =>
-    set((state) => ({ projects: [...state.projects, project] })),
+  addProject: async (projectData) => {
+    set({ isLoading: true })
+    try {
+      const newProject = await apiRequest(API_ENDPOINTS.PROJECTS, {
+        method: 'POST',
+        body: JSON.stringify(projectData),
+      })
+      set((state) => ({ 
+        projects: [...state.projects, newProject],
+        isLoading: false 
+      }))
+    } catch (error) {
+      console.error('Failed to create project:', error)
+      set({ isLoading: false })
+      throw error
+    }
+  },
   
-  updateProject: (id, updates) =>
-    set((state) => ({
-      projects: state.projects.map((p) =>
-        p.id === id ? { ...p, ...updates, updatedAt: new Date() } : p
-      ),
-    })),
+  updateProject: async (id, updates) => {
+    set({ isLoading: true })
+    try {
+      await apiRequest(`${API_ENDPOINTS.PROJECTS}/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(updates),
+      })
+      set((state) => ({
+        projects: state.projects.map((p) =>
+          p.id === id ? { ...p, ...updates, updatedAt: new Date() } : p
+        ),
+        isLoading: false,
+      }))
+    } catch (error) {
+      console.error('Failed to update project:', error)
+      set({ isLoading: false })
+      throw error
+    }
+  },
   
-  deleteProject: (id) =>
-    set((state) => ({
-      projects: state.projects.filter((p) => p.id !== id),
-    })),
+  deleteProject: async (id) => {
+    set({ isLoading: true })
+    try {
+      await apiRequest(`${API_ENDPOINTS.PROJECTS}/${id}`, {
+        method: 'DELETE',
+      })
+      set((state) => ({
+        projects: state.projects.filter((p) => p.id !== id),
+        isLoading: false,
+      }))
+    } catch (error) {
+      console.error('Failed to delete project:', error)
+      set({ isLoading: false })
+      throw error
+    }
+  },
   
   setTasks: (tasks) => set({ tasks }),
   

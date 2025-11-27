@@ -8,7 +8,7 @@ export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const { setUser } = useAuthStore()
+  const { login } = useAuthStore()
   const navigate = useNavigate()
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -16,20 +16,8 @@ export default function Login() {
     setIsLoading(true)
 
     try {
-      // Mock login - Replace with real authentication
       if (email && password) {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-        
-        // Mock user
-        setUser({
-          id: '1',
-          email: email,
-          name: email.split('@')[0],
-          role: 'admin',
-          createdAt: new Date(),
-        })
-
+        await login(email, password)
         toast.success('Welcome to Brospace!')
         navigate('/')
       } else {

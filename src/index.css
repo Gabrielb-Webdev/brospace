@@ -4,7 +4,7 @@
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-dark-800;
   }
   body {
     @apply bg-dark-950 text-dark-50 antialiased;

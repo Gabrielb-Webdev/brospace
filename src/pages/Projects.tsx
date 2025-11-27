@@ -1,16 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAppStore } from '../store/appStore'
-import { useAuthStore } from '../store/authStore'
 import { Plus, Search, Filter } from 'lucide-react'
 import CreateProjectModal from '../components/modals/CreateProjectModal'
 import ProjectCard from '../components/ProjectCard'
 
 export default function Projects() {
-  const { projects } = useAppStore()
-  const { user } = useAuthStore()
+  const { projects, fetchProjects } = useAppStore()
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [showCreateModal, setShowCreateModal] = useState(false)
+  
+  useEffect(() => {
+    fetchProjects()
+  }, [])
 
   const filteredProjects = projects.filter((project) => {
     const matchesSearch =

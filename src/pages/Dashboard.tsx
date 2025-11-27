@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useAppStore } from '../store/appStore'
 import { useAuthStore } from '../store/authStore'
 import {
@@ -10,8 +11,12 @@ import {
 } from 'lucide-react'
 
 export default function Dashboard() {
-  const { projects, tasks } = useAppStore()
+  const { projects, tasks, fetchProjects } = useAppStore()
   const { user } = useAuthStore()
+  
+  useEffect(() => {
+    fetchProjects()
+  }, [])
 
   const stats = [
     {
